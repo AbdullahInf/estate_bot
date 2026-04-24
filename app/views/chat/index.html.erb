@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Estate Bot</title>
+  <%= csrf_meta_tags %>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Poppins:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --green:       #1dab61;
+      --green-hover: #179c56;
+      --green-glow:  rgba(29,171,97,0.18);
+      --navy:        #080d18;
+      --white:       #ffffff;
+      --text:        #111827;
+      --text-muted:  #6b7280;
+      --border:      rgba(0,0,0,0.09);
+    }
+
+    html, body {
+      height: 100%;
+      font-family: 'Inter', sans-serif;
+      background: var(--navy);
+      overflow: hidden;
+    }
+
+    /* ── Full-page layout ── */
+    .page {
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Ambient blobs */
+    .page::before {
+      content: '';
+      position: absolute;
+      top: -200px; left: -200px;
+      width: 800px; height: 800px;
+      background: radial-gradient(circle, rgba(29,171,97,0.1) 0%, transparent 65%);
+      pointer-events: none;
+    }
+    .page::after {
+      content: '';
+      position: absolute;
+      bottom: -200px; right: -100px;
+      width: 700px; height: 700px;
+      background: radial-gradient(circle, rgba(29,171,97,0.07) 0%, transparent 65%);
+      pointer-events: none;
+    }
+
+    /* ── Giant background text ── */
+    .bg-text {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      white-space: nowrap;
+      font-family: 'Poppins', sans-serif;
+      font-weight: 800;
+      font-size: clamp(80px, 14vw, 200px);
+      letter-spacing: -0.04em;
+      line-height: 1;
+      pointer-events: none;
+      user-select: none;
+      display: flex;
+      gap: 0.25em;
+    }
+    .bg-text .t1 { color: rgba(255,255,255,0.05); }
+    .bg-text .t2 { color: rgba(29,171,97,0.12); }
+
+    /* Subtle grid lines */
+    .grid-lines {
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+      background-size: 60px 60px;
+      pointer-events: none;
+    }
+
+    /* ── Phone wrap (adds side buttons) ── */
+    .phone-wrap {
+      position: relative;
+      z-index: 10;
+      filter: drop-shadow(0 40px 100px rgba(0,0,0,0.7)) drop-shadow(0 0 60px rgba(29,171,97,0.12));
+    }
+    .phone-wrap::before {
+      content: '';
+      position: absolute;
+      left: -5px; top: 130px;
+      width: 5px; height: 38px;
+      background: #1a2535;
+      border-radius: 4px 0 0 4px;
+      box-shadow: 0 54px 0 #1a2535, 0 108px 0 #1a2535;
+    }
+    .phone-wrap::after {
+      content: '';
+      position: absolute;
+      right: -5px; top: 200px;
+      width: 5px; height: 70px;
+      background: #1a2535;
+      border-radius: 0 4px 4px 0;
+    }
+
+    /* ── Phone frame ── */
+    .phone {
+      width: 430px;
+      height: 88vh;
+      max-height: 900px;
+      min-height: 700px;
+      background: #0d1526;
+      border-radius: 52px;
+      border: 1.5px solid rgba(255,255,255,0.1);
+      outline: 7px solid #0b1020;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      position: relative;
+    }
+
+    /* Dynamic island */
+    .dynamic-island {
+      position: absolute;
+      top: 13px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 110px;
+      height: 30px;
+      background: #000;
+      border-radius: 20px;
+      z-index: 20;
+    }
+
+    /* ── Status bar ── */
+    .status-bar {
+      padding: 16px 26px 4px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-shrink: 0;
+      background: #0d1526;
+    }
+    .status-time {
+      color: #fff;
+      font-size: 16px;
+      font-weight: 700;
+      letter-spacing: -0.03em;
+    }
+    .status-icons {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .status-icons svg { width: 15px; height: 15px; fill: #fff; }
+
+    /* ── Nav bar ── */
+    .nav-bar {
+      padding: 8px 18px 10px;
+      display: flex;
+      align-items: center;
+      gap: 11px;
+      background: #0d1526;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+      flex-shrink: 0;
+    }
+    .nav-avatar {
+      width: 40px; height: 40px;
+      background: linear-gradient(135deg, var(--green), #0d9f50);
+      border-radius: 13px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      flex-shrink: 0;
+    }
+    .nav-info { flex: 1; min-width: 0; }
+    .nav-name {
+      color: #fff;
+      font-family: 'Poppins', sans-serif;
+      font-weight: 600;
+      font-size: 15px;
+      letter-spacing: -0.01em;
+    }
+    .nav-sub {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      margin-top: 1px;
+    }
+    .nav-email {
+      color: rgba(255,255,255,0.35);
+      font-size: 10.5px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      max-width: 150px;
+    }
+    .status-dot {
+      width: 5px; height: 5px;
+      background: var(--green);
+      border-radius: 50%;
+      flex-shrink: 0;
+      animation: blink 2.5s infinite;
+    }
+    @keyframes blink { 0%,100% { opacity:1; } 50% { opacity:0.15; } }
+
+    .nav-actions { display: flex; gap: 5px; flex-shrink: 0; }
+    .nav-btn {
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.09);
+      color: rgba(255,255,255,0.45);
+      border-radius: 8px;
+      font-size: 10.5px;
+      font-weight: 500;
+      padding: 5px 10px;
+      cursor: pointer;
+      font-family: 'Inter', sans-serif;
+      transition: all 0.2s;
+      white-space: nowrap;
+    }
+    .nav-btn:hover { background: rgba(255,255,255,0.11); color: #fff; }
+
+    /* ── Messages ── */
+    .messages {
+      flex: 1;
+      overflow-y: auto;
+      padding: 18px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      background: #111827;
+      scroll-behavior: smooth;
+    }
+    .messages::-webkit-scrollbar { width: 0; }
+
+    /* ── Bot card ── */
+    .card {
+      background: #fff;
+      border-radius: 18px 18px 18px 4px;
+      padding: 14px 17px;
+      max-width: 86%;
+      align-self: flex-start;
+      box-shadow: 0 2px 16px rgba(0,0,0,0.22);
+    }
+    .card p {
+      font-size: 14px;
+      line-height: 1.6;
+      color: var(--text);
+      white-space: pre-wrap;
+      word-wrap: break-word;
+    }
+    .card p a { color: var(--green); font-weight: 500; text-decoration: none; border-bottom: 1px solid rgba(29,171,97,0.3); }
+    .card p a:hover { border-color: var(--green); }
+    .card-time { font-size: 10px; color: var(--text-muted); margin-top: 7px; text-align: right; }
+    .card.typing p { color: #9ca3af; font-style: italic; }
+
+    /* ── User row ── */
+    .user-row {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 4px;
+    }
+    .user-msg {
+      background: var(--green);
+      color: #fff;
+      border-radius: 18px 18px 4px 18px;
+      padding: 12px 16px;
+      max-width: 80%;
+      font-size: 14px;
+      line-height: 1.55;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+      box-shadow: 0 3px 14px rgba(29,171,97,0.4);
+    }
+    .user-msg a { color: rgba(255,255,255,0.85); text-decoration: underline; }
+    .user-time { font-size: 10px; color: rgba(255,255,255,0.25); padding-right: 3px; }
+
+    /* ── Info banner ── */
+    .info-banner {
+      align-self: center;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.07);
+      border-radius: 10px;
+      padding: 6px 14px;
+      font-size: 11px;
+      color: rgba(255,255,255,0.25);
+      text-align: center;
+      margin-bottom: 4px;
+    }
+
+    .user-msg.voice::before { content: "🎤  "; }
+    .user-msg.voice { font-style: italic; }
+
+    /* ── Input bar ── */
+    .input-bar {
+      padding: 12px 16px 28px;
+      display: flex;
+      align-items: flex-end;
+      gap: 8px;
+      background: #0d1526;
+      flex-shrink: 0;
+    }
+    #msg-input {
+      flex: 1;
+      background: #1e293b;
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 22px;
+      padding: 11px 16px;
+      font-size: 14px;
+      color: #f1f5f9;
+      outline: none;
+      resize: none;
+      height: 44px;
+      max-height: 110px;
+      overflow-y: auto;
+      font-family: 'Inter', sans-serif;
+      line-height: 1.45;
+      transition: border-color 0.2s;
+    }
+    #msg-input::placeholder { color: rgba(255,255,255,0.2); }
+    #msg-input:focus { border-color: rgba(29,171,97,0.45); }
+
+    .send-btn {
+      width: 44px; height: 44px;
+      background: var(--green);
+      border: none; border-radius: 50%;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+      transition: background 0.2s, transform 0.15s;
+      box-shadow: 0 4px 18px rgba(29,171,97,0.45);
+    }
+    .send-btn:hover  { background: var(--green-hover); transform: scale(1.06); }
+    .send-btn:active { transform: scale(0.96); }
+    .send-btn:disabled { background: #1e293b; box-shadow: none; cursor: not-allowed; transform: none; }
+    .send-btn svg { fill: #fff; width: 18px; height: 18px; }
+    .send-btn:disabled svg { fill: rgba(255,255,255,0.2); }
+
+    .icon-btn {
+      width: 44px; height: 44px;
+      background: #1e293b;
+      border: 1px solid rgba(255,255,255,0.07);
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+      font-size: 18px;
+      transition: background 0.2s;
+    }
+    .icon-btn:hover { background: #273548; }
+    .icon-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+    .icon-btn.recording { background: rgba(220,68,68,0.18); border-color: rgba(220,68,68,0.4); animation: pulse 1s infinite; }
+    @keyframes pulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.08); } }
+  </style>
+</head>
+<body>
+<div class="page">
+  <div class="grid-lines"></div>
+
+  <!-- Giant background text -->
+  <div class="bg-text" aria-hidden="true">
+    <span class="t1">I'm</span>
+    <span class="t2">Estate Bot,</span>
+  </div>
+
+  <!-- Phone -->
+  <div class="phone-wrap">
+    <div class="phone">
+      <div class="dynamic-island"></div>
+
+      <!-- Status bar -->
+      <div class="status-bar">
+        <span class="status-time" id="clock">9:41</span>
+        <div class="status-icons">
+          <svg viewBox="0 0 24 24"><rect x="1" y="14" width="3" height="6" rx="1"/><rect x="6" y="10" width="3" height="10" rx="1" opacity=".65"/><rect x="11" y="6" width="3" height="14" rx="1" opacity=".4"/><rect x="16" y="2" width="3" height="18" rx="1" opacity=".2"/></svg>
+          <svg viewBox="0 0 24 24"><path d="M1.5 8.5C5.2 4.8 10.3 3 12 3s6.8 1.8 10.5 5.5l-2.1 2.1C17.5 7.7 14.9 6 12 6S6.5 7.7 3.6 10.6zm4.2 4.2C7.4 10.9 9.6 10 12 10s4.6.9 6.3 2.7l-2.1 2.1C15 13.6 13.6 13 12 13s-3 .6-4.2 1.8zm4.2 4.2c.6-.6 1.4-1 2.1-1s1.5.4 2.1 1L12 20z"/></svg>
+          <svg viewBox="0 0 24 24"><rect x="2" y="7" width="18" height="10" rx="2" stroke="#fff" stroke-width="1.5" fill="none"/><rect x="4" y="9" width="13" height="6" rx="1" fill="#fff"/><path d="M21 10v4" stroke="#fff" stroke-width="1.5" stroke-linecap="round"/></svg>
+        </div>
+      </div>
+
+      <!-- Nav bar -->
+      <div class="nav-bar">
+        <div class="nav-avatar">🏠</div>
+        <div class="nav-info">
+          <div class="nav-name">Estate Bot</div>
+          <div class="nav-sub">
+            <span class="status-dot"></span>
+            <% if broker_signed_in? %>
+              <span class="nav-email"><%= current_broker.email %></span>
+            <% else %>
+              <span class="nav-email" style="color:rgba(29,171,97,0.7);">Online</span>
+            <% end %>
+          </div>
+        </div>
+        <div class="nav-actions">
+          <%= button_to "Reset", reset_chat_path, method: :delete, class: "nav-btn", data: { confirm: "Clear conversation?" } %>
+          <% if broker_signed_in? %>
+            <%= button_to "Sign out", signout_path, method: :delete, class: "nav-btn" %>
+          <% end %>
+        </div>
+      </div>
+
+      <!-- Messages -->
+      <div class="messages" id="messages">
+        <div class="info-banner">Type a message · hold 🎤 to record · 📎 upload audio</div>
+
+        <% @messages.each do |msg| %>
+          <% if msg.role == "user" %>
+            <div class="user-row">
+              <div class="user-msg"><%= msg.content.gsub(/\n/, "<br>").gsub(/(https?:\/\/[^\s<)\]]+)/, '<a href="\1" target="_blank" rel="noopener">\1</a>').html_safe %></div>
+              <div class="user-time"><%= msg.created_at.strftime("%H:%M") %></div>
+            </div>
+          <% else %>
+            <div class="card">
+              <p><%= msg.content.gsub(/\n/, "<br>").gsub(/(https?:\/\/[^\s<)\]]+)/, '<a href="\1" target="_blank" rel="noopener">\1</a>').html_safe %></p>
+              <div class="card-time"><%= msg.created_at.strftime("%H:%M") %></div>
+            </div>
+          <% end %>
+        <% end %>
+
+        <% if @messages.empty? %>
+          <div class="card">
+            <p>Hey! I'm your AI property broker assistant. Ask me about clients, documents, or emails. 👋</p>
+            <div class="card-time"><%= Time.current.strftime("%H:%M") %></div>
+          </div>
+        <% end %>
+      </div>
+
+      <!-- Input bar -->
+      <div class="input-bar">
+        <button class="icon-btn" id="upload-btn" title="Upload audio">📎</button>
+        <input type="file" id="audio-file" accept="audio/*" style="display:none" />
+        <textarea id="msg-input" placeholder="Message…" rows="1"></textarea>
+        <button class="icon-btn" id="mic-btn" title="Hold to record">🎤</button>
+        <button class="send-btn" id="send-btn">
+          <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+  <script>
+    function updateClock() {
+      const t = new Date();
+      document.getElementById("clock").textContent =
+        t.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+    }
+    updateClock();
+    setInterval(updateClock, 10000);
+
+    const messagesEl = document.getElementById("messages");
+    const input      = document.getElementById("msg-input");
+    const sendBtn    = document.getElementById("send-btn");
+    const csrfToken  = document.querySelector("meta[name='csrf-token']")?.content || "<%= form_authenticity_token %>";
+
+    const scrollToBottom = () => { messagesEl.scrollTop = messagesEl.scrollHeight; };
+
+    function now() {
+      return new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+    }
+
+    function linkify(text) {
+      return text
+        .replace(/\n/g, "<br>")
+        .replace(/(https?:\/\/[^\s<)\]]+)/g, '<a href="$1" target="_blank" rel="noopener">$1</a>');
+    }
+
+    function appendBot(text, typing = false) {
+      const card = document.createElement("div");
+      card.className = typing ? "card typing" : "card";
+      card.innerHTML = `<p>${linkify(text)}</p><div class="card-time">${now()}</div>`;
+      messagesEl.appendChild(card);
+      scrollToBottom();
+      return card;
+    }
+
+    function appendUser(text, extra = "") {
+      const row = document.createElement("div");
+      row.className = "user-row";
+      row.innerHTML = `<div class="user-msg ${extra}">${linkify(text)}</div><div class="user-time">${now()}</div>`;
+      messagesEl.appendChild(row);
+      scrollToBottom();
+      return row;
+    }
+
+    async function sendMessage() {
+      const text = input.value.trim();
+      if (!text) return;
+      input.value = "";
+      input.style.height = "44px";
+      sendBtn.disabled = true;
+      appendUser(text);
+      const typing = appendBot("typing…", true);
+      try {
+        const res  = await fetch("<%= chat_message_path %>", {
+          method: "POST",
+          headers: { "Content-Type": "application/json", "X-CSRF-Token": csrfToken },
+          body: JSON.stringify({ text })
+        });
+        const data = await res.json();
+        typing.remove();
+        appendBot(data.reply || ("⚠️ " + (data.error || "Something went wrong")));
+      } catch {
+        typing.remove();
+        appendBot("⚠️ Network error. Is the server running?");
+      } finally {
+        sendBtn.disabled = false;
+        input.focus();
+      }
+    }
+
+    sendBtn.addEventListener("click", sendMessage);
+    input.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+    });
+    input.addEventListener("input", () => {
+      input.style.height = "44px";
+      input.style.height = Math.min(input.scrollHeight, 110) + "px";
+    });
+
+    scrollToBottom();
+
+    const uploadBtn   = document.getElementById("upload-btn");
+    const audioFileEl = document.getElementById("audio-file");
+    uploadBtn.addEventListener("click", () => audioFileEl.click());
+    audioFileEl.addEventListener("change", async () => {
+      const file = audioFileEl.files[0];
+      if (!file) return;
+      audioFileEl.value = "";
+      await sendAudio(file, file.name);
+    });
+
+    const micBtn = document.getElementById("mic-btn");
+    let mediaRecorder, audioChunks = [];
+
+    micBtn.addEventListener("mousedown", async () => {
+      if (!navigator.mediaDevices) { appendBot("⚠️ Microphone not available."); return; }
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        audioChunks  = [];
+        mediaRecorder = new MediaRecorder(stream);
+        mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
+        mediaRecorder.start();
+        micBtn.classList.add("recording");
+      } catch { appendBot("⚠️ Microphone permission denied."); }
+    });
+
+    micBtn.addEventListener("mouseup", stopRecording);
+    micBtn.addEventListener("mouseleave", () => { if (mediaRecorder?.state === "recording") stopRecording(); });
+
+    function stopRecording() {
+      if (!mediaRecorder || mediaRecorder.state !== "recording") return;
+      mediaRecorder.stop();
+      micBtn.classList.remove("recording");
+      mediaRecorder.onstop = async () => {
+        const blob = new Blob(audioChunks, { type: "audio/webm" });
+        mediaRecorder.stream.getTracks().forEach(t => t.stop());
+        await sendAudio(blob, "voice_note.webm");
+      };
+    }
+
+    async function sendAudio(file, filename) {
+      setAllDisabled(true);
+      const voiceRow = appendUser(`Voice note: ${filename}`, "voice");
+      const typing   = appendBot("Transcribing…", true);
+      const form = new FormData();
+      form.append("audio", file, filename);
+      try {
+        const res  = await fetch("<%= chat_voice_path %>", {
+          method: "POST",
+          headers: { "X-CSRF-Token": csrfToken },
+          body: form
+        });
+        const data = await res.json();
+        typing.remove();
+        if (data.transcript) voiceRow.querySelector(".user-msg").innerHTML = `"${linkify(data.transcript)}"`;
+        appendBot(data.reply || ("⚠️ " + (data.error || "Something went wrong")));
+      } catch {
+        typing.remove();
+        appendBot("⚠️ Network error.");
+      } finally { setAllDisabled(false); }
+    }
+
+    function setAllDisabled(val) {
+      sendBtn.disabled = uploadBtn.disabled = micBtn.disabled = val;
+    }
+  </script>
+</body>
+</html>
