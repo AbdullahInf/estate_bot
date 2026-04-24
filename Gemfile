@@ -21,7 +21,7 @@ gem "redis", "~> 5.0"
 
 # Background job processing
 gem "sidekiq", "~> 7.0"
-gem "connection_pool", "~> 2.4"
+gem "connection_pool", "~> 3.0"
 
 # OpenAI API — Whisper transcription + GPT-4o agent
 gem "ruby-openai", "~> 7.0"
