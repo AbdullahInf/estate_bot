@@ -24,7 +24,7 @@ gem "sidekiq", "~> 7.0"
 gem "connection_pool", "~> 2.4"
 
 # OpenAI API — Whisper transcription + GPT-4o agent
-gem "ruby-openai", "~> 7.0"
+gem "ruby-openai", "~> 8.3"
 
 # HTTP client for WhatsApp API calls
 gem "faraday", "~> 2.0"
