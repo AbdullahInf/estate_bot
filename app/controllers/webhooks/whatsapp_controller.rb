@@ -1,5 +1,5 @@
 module Webhooks
-  class WhatsappController < ApplicationController
+  class WhatsappController < ActionController::Base
     skip_before_action :verify_authenticity_token
     before_action :verify_webhook_signature, only: :create
 

@@ -1,4 +1,4 @@
-class Webhooks::GmailController < ApplicationController
+class Webhooks::GmailController < ActionController::Base
   skip_before_action :verify_authenticity_token
 
   # Receives Gmail push notifications forwarded via Google Cloud Pub/Sub.

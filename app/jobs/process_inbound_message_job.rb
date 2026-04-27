@@ -11,6 +11,7 @@ class ProcessInboundMessageJob < ApplicationJob
     return if msg["whatsapp_id"] && Message.exists?(whatsapp_message_id: msg["whatsapp_id"])
 
     whatsapp = Whatsapp::Client.new
+    broker   = Broker.first
 
     case msg["type"]
     when "text"
@@ -18,14 +19,13 @@ class ProcessInboundMessageJob < ApplicationJob
       return if text.blank?
 
       save_message(conversation, role: "user", content: text, type: "text", wa_id: msg["whatsapp_id"])
-      reply = Agent::PropertyBrokerService.new(conversation).call(text)
+      reply = Agent::PropertyBrokerService.new(conversation, broker: broker).call(text)
       send_and_save_reply(conversation, whatsapp, msg["from"], reply)
 
     when "audio"
       media_id = msg["audio_media_id"]
       return unless media_id
 
-      # Acknowledge immediately so broker knows we're processing
       whatsapp.send_text(to: msg["from"], body: "Got it, one moment...")
 
       audio_data = whatsapp.download_media(media_id)
@@ -35,7 +35,7 @@ class ProcessInboundMessageJob < ApplicationJob
       return if transcript.blank?
 
       save_message(conversation, role: "user", content: transcript, type: "audio", wa_id: msg["whatsapp_id"], media_id: media_id)
-      reply = Agent::PropertyBrokerService.new(conversation).call(transcript)
+      reply = Agent::PropertyBrokerService.new(conversation, broker: broker).call(transcript)
       send_and_save_reply(conversation, whatsapp, msg["from"], reply)
     end
   end
