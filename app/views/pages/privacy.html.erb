@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Privacy Policy — Estate Bot</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Poppins:wght@600;700;800&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      font-family: 'Inter', sans-serif;
+      background: #080d18;
+      color: #e2e8f0;
+      min-height: 100%;
+    }
+
+    body {
+      background:
+        radial-gradient(ellipse 900px 600px at 10% 10%, rgba(29,171,97,0.07) 0%, transparent 60%),
+        radial-gradient(ellipse 600px 500px at 90% 90%, rgba(29,171,97,0.05) 0%, transparent 60%),
+        #080d18;
+    }
+
+    .header {
+      padding: 20px 40px;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .logo {
+      width: 36px; height: 36px;
+      background: linear-gradient(135deg, #1dab61, #0d9f50);
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px;
+    }
+    .logo-name {
+      font-family: 'Poppins', sans-serif;
+      font-weight: 700;
+      font-size: 16px;
+      color: #fff;
+    }
+    .header a { color: rgba(255,255,255,0.4); font-size: 13px; margin-left: auto; text-decoration: none; }
+    .header a:hover { color: #1dab61; }
+
+    .container {
+      max-width: 760px;
+      margin: 60px auto;
+      padding: 0 24px 80px;
+    }
+
+    h1 {
+      font-family: 'Poppins', sans-serif;
+      font-size: 36px;
+      font-weight: 700;
+      color: #fff;
+      letter-spacing: -0.02em;
+      margin-bottom: 8px;
+    }
+
+    .updated {
+      color: rgba(255,255,255,0.35);
+      font-size: 13px;
+      margin-bottom: 48px;
+    }
+    .updated span { color: #1dab61; }
+
+    h2 {
+      font-size: 16px;
+      font-weight: 600;
+      color: #fff;
+      margin: 36px 0 12px;
+      padding-left: 12px;
+      border-left: 3px solid #1dab61;
+    }
+
+    p {
+      font-size: 14.5px;
+      line-height: 1.8;
+      color: rgba(255,255,255,0.55);
+      margin-bottom: 14px;
+    }
+
+    ul {
+      padding-left: 20px;
+      margin-bottom: 14px;
+    }
+    ul li {
+      font-size: 14.5px;
+      line-height: 1.8;
+      color: rgba(255,255,255,0.55);
+      margin-bottom: 6px;
+    }
+
+    .card {
+      background: #0d1526;
+      border: 1px solid rgba(255,255,255,0.07);
+      border-radius: 16px;
+      padding: 24px 28px;
+      margin: 32px 0;
+    }
+    .card p { margin: 0; }
+
+    a { color: #1dab61; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    .footer {
+      text-align: center;
+      padding: 32px;
+      color: rgba(255,255,255,0.2);
+      font-size: 12px;
+      border-top: 1px solid rgba(255,255,255,0.05);
+    }
+  </style>
+</head>
+<body>
+
+  <div class="header">
+    <div class="logo">🏠</div>
+    <span class="logo-name">Estate Bot</span>
+    <a href="/">← Back to app</a>
+  </div>
+
+  <div class="container">
+    <h1>Privacy Policy</h1>
+    <p class="updated">Last updated: <span>April 2026</span></p>
+
+    <div class="card">
+      <p>Estate Bot is an AI-powered property broker assistant that helps real estate brokers manage client document collection and communications via WhatsApp and email.</p>
+    </div>
+
+    <h2>Information We Collect</h2>
+    <p>We collect and process the following information to provide our service:</p>
+    <ul>
+      <li>WhatsApp messages and voice notes sent to the Estate Bot number</li>
+      <li>Email messages and attachments received in your connected Gmail inbox</li>
+      <li>Google account information (email address, name) for authentication</li>
+      <li>Conversation history between brokers and the AI assistant</li>
+    </ul>
+
+    <h2>How We Use Your Information</h2>
+    <p>The information collected is used solely to:</p>
+    <ul>
+      <li>Power the AI assistant to respond to broker queries via WhatsApp</li>
+      <li>Search and retrieve emails and attachments on the broker's behalf</li>
+      <li>Send emails to clients on the broker's behalf when instructed</li>
+      <li>Transcribe voice notes to text using OpenAI Whisper</li>
+      <li>Maintain conversation context to provide relevant responses</li>
+    </ul>
+
+    <h2>Data Storage</h2>
+    <p>Your data is stored securely in a PostgreSQL database. Email attachments are stored in the database upon receipt. Conversation history is retained to maintain context for the AI assistant.</p>
+    <p>We do not sell, share, or transfer your personal data to third parties except as required to operate the service (OpenAI for AI processing, Google for Gmail/Drive access, Meta for WhatsApp messaging).</p>
+
+    <h2>Third-Party Services</h2>
+    <ul>
+      <li><strong style="color:#fff">OpenAI</strong> — processes messages and voice transcriptions</li>
+      <li><strong style="color:#fff">Google</strong> — Gmail and Google Drive access via OAuth</li>
+      <li><strong style="color:#fff">Meta (WhatsApp)</strong> — messaging platform</li>
+    </ul>
+
+    <h2>Data Retention</h2>
+    <p>Conversation data and emails are retained for as long as the broker account is active. You may request deletion of your data at any time by contacting us.</p>
+
+    <h2>Your Rights</h2>
+    <p>You have the right to access, correct, or delete your personal data. To exercise these rights, please contact us at the email below.</p>
+
+    <h2>Contact</h2>
+    <p>For any privacy-related questions or data deletion requests, contact us at: <a href="mailto:privacy@estatebot.ai">privacy@estatebot.ai</a></p>
+  </div>
+
+  <div class="footer">
+    © <%= Date.current.year %> Estate Bot. All rights reserved.
+  </div>
+
+</body>
+</html>
