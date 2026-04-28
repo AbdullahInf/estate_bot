@@ -29,6 +29,8 @@ Rails.application.routes.draw do
   # Sidekiq dashboard (restrict in production)
   mount Sidekiq::Web => "/sidekiq"
 
+  get "/dashboard", to: "dashboard#index", as: :dashboard
+
   get "/privacy", to: "pages#privacy", as: :privacy
 
   root to: "auth#new"

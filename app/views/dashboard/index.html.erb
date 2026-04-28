@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard — Estate Bot</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@600;700;800&display=swap" rel="stylesheet">
+  <%= csrf_meta_tags %>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --green:      #1dab61;
+      --green-dim:  rgba(29,171,97,0.15);
+      --green-glow: rgba(29,171,97,0.18);
+      --navy:       #080d18;
+      --card:       #0d1526;
+      --card2:      #111827;
+      --border:     rgba(255,255,255,0.07);
+      --text:       #f1f5f9;
+      --muted:      rgba(255,255,255,0.35);
+      --muted2:     rgba(255,255,255,0.18);
+    }
+
+    html, body {
+      min-height: 100%;
+      font-family: 'Inter', sans-serif;
+      background: var(--navy);
+      color: var(--text);
+    }
+
+    /* ── Ambient background ── */
+    .bg-layer {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+    }
+    .bg-layer::before {
+      content: '';
+      position: absolute;
+      top: -200px; left: -200px;
+      width: 800px; height: 800px;
+      background: radial-gradient(circle, rgba(29,171,97,0.07) 0%, transparent 65%);
+    }
+    .bg-layer::after {
+      content: '';
+      position: absolute;
+      bottom: -200px; right: -100px;
+      width: 700px; height: 700px;
+      background: radial-gradient(circle, rgba(29,171,97,0.05) 0%, transparent 65%);
+    }
+    .grid-lines {
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(255,255,255,0.015) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.015) 1px, transparent 1px);
+      background-size: 60px 60px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ── App nav ── */
+    .app-nav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      height: 52px;
+      background: rgba(13,21,38,0.92);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      padding: 0 20px;
+      gap: 0;
+    }
+
+    .nav-brand {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 700;
+      font-size: 14px;
+      color: #fff;
+      margin-right: 24px;
+      text-decoration: none;
+      flex-shrink: 0;
+    }
+    .nav-brand-icon {
+      width: 28px; height: 28px;
+      background: linear-gradient(135deg, var(--green), #0d9f50);
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 13px;
+      box-shadow: 0 4px 12px rgba(29,171,97,0.35);
+    }
+
+    .nav-tabs {
+      display: flex;
+      gap: 2px;
+      flex: 1;
+    }
+    .nav-tab {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      border-radius: 7px;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--muted);
+      text-decoration: none;
+      transition: background 0.15s, color 0.15s;
+      white-space: nowrap;
+    }
+    .nav-tab svg { width: 14px; height: 14px; }
+    .nav-tab:hover { background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.8); }
+    .nav-tab.active { background: var(--green-dim); color: var(--green); }
+
+    .nav-right {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-left: auto;
+    }
+    .nav-user-info { text-align: right; }
+    .nav-user-name { font-size: 12.5px; font-weight: 600; color: rgba(255,255,255,0.85); }
+    .nav-user-role { font-size: 10.5px; color: var(--muted); }
+    .nav-avatar {
+      width: 30px; height: 30px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--green), #0d9f50);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 11px; font-weight: 700; color: #fff;
+      flex-shrink: 0;
+    }
+    .nav-signout {
+      font-size: 11.5px;
+      color: var(--muted);
+      text-decoration: none;
+      padding: 4px 10px;
+      border-radius: 6px;
+      border: 1px solid rgba(255,255,255,0.08);
+      background: transparent;
+      cursor: pointer;
+      font-family: 'Inter', sans-serif;
+      transition: all 0.15s;
+    }
+    .nav-signout:hover { background: rgba(239,68,68,0.1); border-color: rgba(239,68,68,0.2); color: #f87171; }
+
+    /* ── Main ── */
+    .main {
+      position: relative;
+      z-index: 1;
+      max-width: 1160px;
+      margin: 0 auto;
+      padding: 28px 20px 40px;
+    }
+
+    /* ── Greeting ── */
+    .greeting-title {
+      font-family: 'Poppins', sans-serif;
+      font-size: 22px;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 4px;
+      letter-spacing: -0.02em;
+    }
+    .greeting-sub {
+      font-size: 13px;
+      color: var(--muted);
+      margin-bottom: 24px;
+    }
+
+    /* ── Stat grid ── */
+    .stat-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 14px;
+      margin-bottom: 20px;
+    }
+
+    .stat-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 18px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .stat-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .stat-label {
+      font-size: 10.5px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      color: var(--muted);
+    }
+    .stat-icon {
+      width: 30px; height: 30px;
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .stat-icon svg { width: 15px; height: 15px; }
+    .si-green  { background: rgba(29,171,97,0.15); }
+    .si-blue   { background: rgba(59,130,246,0.15); }
+    .si-purple { background: rgba(168,85,247,0.15); }
+    .si-gray   { background: rgba(255,255,255,0.07); }
+
+    .stat-value {
+      font-size: 30px;
+      font-weight: 700;
+      color: #fff;
+      line-height: 1;
+      letter-spacing: -0.03em;
+    }
+    .stat-sub { font-size: 11.5px; color: var(--muted); }
+    .stat-sub .hi-green  { color: var(--green); font-weight: 500; }
+    .stat-sub .hi-amber  { color: #f59e0b; font-weight: 500; }
+
+    /* ── Content grid ── */
+    .content-grid {
+      display: grid;
+      grid-template-columns: 1fr 300px;
+      gap: 16px;
+      align-items: start;
+    }
+
+    /* ── Card ── */
+    .panel {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      overflow: hidden;
+    }
+    .panel-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 18px;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+    .panel-title {
+      font-size: 13.5px;
+      font-weight: 600;
+      color: #fff;
+    }
+    .panel-link {
+      font-size: 11.5px;
+      color: var(--muted);
+      text-decoration: none;
+      transition: color 0.15s;
+    }
+    .panel-link:hover { color: var(--green); }
+
+    /* ── Client rows ── */
+    .client-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 18px;
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+      transition: background 0.1s;
+    }
+    .client-row:last-child { border-bottom: none; }
+    .client-row:hover { background: rgba(255,255,255,0.025); }
+
+    .client-avatar {
+      width: 34px; height: 34px;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 11.5px; font-weight: 700; color: #fff;
+      flex-shrink: 0;
+    }
+
+    .client-info { flex: 0 0 160px; min-width: 0; }
+    .client-name {
+      font-size: 13px; font-weight: 600; color: #fff;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .client-email {
+      font-size: 11px; color: var(--muted);
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+
+    .client-progress { flex: 1; min-width: 60px; }
+    .bar-wrap {
+      height: 4px;
+      background: rgba(255,255,255,0.08);
+      border-radius: 99px;
+      overflow: hidden;
+      margin-bottom: 4px;
+    }
+    .bar-fill {
+      height: 100%;
+      border-radius: 99px;
+    }
+    .bar-label { font-size: 10.5px; color: var(--muted); }
+
+    .client-time { font-size: 11px; color: var(--muted2); white-space: nowrap; flex-shrink: 0; }
+
+    .badge {
+      font-size: 10.5px; font-weight: 600;
+      padding: 3px 8px;
+      border-radius: 99px;
+      white-space: nowrap; flex-shrink: 0;
+    }
+    .badge-ready   { background: rgba(29,171,97,0.15);  color: var(--green); }
+    .badge-missing { background: rgba(239,68,68,0.12);  color: #f87171; }
+
+    /* ── Activity ── */
+    .activity-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      padding: 11px 16px;
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+      transition: background 0.1s;
+    }
+    .activity-row:last-child { border-bottom: none; }
+    .activity-row:hover { background: rgba(255,255,255,0.025); }
+
+    .activity-avatar {
+      width: 30px; height: 30px;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 10.5px; font-weight: 700; color: #fff;
+      flex-shrink: 0; margin-top: 1px;
+    }
+    .activity-body { flex: 1; min-width: 0; }
+    .activity-sender { font-size: 12.5px; font-weight: 600; color: #fff; }
+    .activity-subject {
+      font-size: 11.5px; color: var(--muted);
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 1px;
+    }
+    .activity-docs { font-size: 11px; color: var(--muted2); margin-top: 2px; }
+    .activity-time { font-size: 10.5px; color: var(--muted2); white-space: nowrap; flex-shrink: 0; margin-top: 2px; }
+
+    /* ── Empty ── */
+    .empty {
+      padding: 36px 18px;
+      text-align: center;
+      font-size: 13px;
+      color: var(--muted);
+    }
+    .empty strong { display: block; font-size: 14px; color: rgba(255,255,255,0.5); margin-bottom: 5px; }
+
+    @media (max-width: 900px) {
+      .stat-grid    { grid-template-columns: repeat(2, 1fr); }
+      .content-grid { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 520px) {
+      .stat-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<%
+  avatar_colors = %w[#0ea5e9 #a855f7 #f97316 #22c55e #ef4444 #3b82f6 #ec4899 #14b8a6 #eab308 #6366f1]
+
+  initials_for = ->(name, email) {
+    src   = name.presence || email
+    parts = src.split(/[\s@._-]+/).reject(&:empty?)
+    parts.first(2).map { |w| w[0].upcase }.join
+  }
+
+  color_for = ->(email) {
+    avatar_colors[email.to_s.bytes.sum % avatar_colors.length]
+  }
+
+  bar_color = ->(pct) {
+    if    pct >= 100 then "#1dab61"
+    elsif pct >= 63  then "#f59e0b"
+    else                  "#ef4444"
+    end
+  }
+
+  expected     = DashboardController::EXPECTED_DOCS
+  broker_first = current_broker.name.to_s.split.first.presence || "there"
+  today_str    = Time.current.strftime("%A, %B %-d, %Y")
+%>
+
+<div class="bg-layer"></div>
+<div class="grid-lines"></div>
+
+<!-- Nav -->
+<nav class="app-nav">
+  <a href="<%= dashboard_path %>" class="nav-brand">
+    <div class="nav-brand-icon">🏠</div>
+    Estate Bot
+  </a>
+
+  <div class="nav-tabs">
+    <a href="<%= dashboard_path %>" class="nav-tab active">
+      <svg viewBox="0 0 20 20" fill="currentColor">
+        <path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zm0 6a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1v-2zm0 6a1 1 0 011-1h6a1 1 0 010 2H4a1 1 0 01-1-1z"/>
+      </svg>
+      Dashboard
+    </a>
+    <a href="<%= chat_path %>" class="nav-tab">
+      <svg viewBox="0 0 20 20" fill="currentColor">
+        <path d="M2 5a2 2 0 012-2h7a2 2 0 012 2v4a2 2 0 01-2 2H9l-3 3v-3H4a2 2 0 01-2-2V5z"/>
+        <path d="M15 7v2a4 4 0 01-4 4H9.828l-1.766 1.767c.28.149.599.233.938.233h2l3 3v-3h2a2 2 0 002-2V9a2 2 0 00-2-2h-1z"/>
+      </svg>
+      Chat Agent
+    </a>
+  </div>
+
+  <div class="nav-right">
+    <div class="nav-user-info">
+      <div class="nav-user-name"><%= current_broker.name %></div>
+      <div class="nav-user-role">Broker</div>
+    </div>
+    <div class="nav-avatar"><%= initials_for.(current_broker.name, current_broker.email) %></div>
+    <%= button_to "Sign out", signout_path, method: :delete, class: "nav-signout", data: { turbo: false } %>
+  </div>
+</nav>
+
+<!-- Main -->
+<div class="main">
+  <h1 class="greeting-title">Good morning, <%= broker_first %> 👋</h1>
+  <p class="greeting-sub">Here's your document pipeline for today — <%= today_str %></p>
+
+  <!-- Stat cards -->
+  <div class="stat-grid">
+    <div class="stat-card">
+      <div class="stat-header">
+        <span class="stat-label">Active Clients</span>
+        <div class="stat-icon si-blue">
+          <svg viewBox="0 0 20 20" fill="#3b82f6">
+            <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z"/>
+          </svg>
+        </div>
+      </div>
+      <div class="stat-value"><%= @total_clients %></div>
+      <div class="stat-sub">
+        <% if @needs_attention > 0 %>
+          <span class="hi-amber"><%= @needs_attention %> need attention</span>
+        <% else %>
+          All clients on track
+        <% end %>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-header">
+        <span class="stat-label">Documents Received</span>
+        <div class="stat-icon si-purple">
+          <svg viewBox="0 0 20 20" fill="#a855f7">
+            <path d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z"/>
+          </svg>
+        </div>
+      </div>
+      <div class="stat-value"><%= @docs_this_week %></div>
+      <div class="stat-sub">This week</div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-header">
+        <span class="stat-label">Fully Ready</span>
+        <div class="stat-icon si-green">
+          <svg viewBox="0 0 20 20" fill="#1dab61">
+            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+          </svg>
+        </div>
+      </div>
+      <div class="stat-value"><%= @fully_ready.length %></div>
+      <div class="stat-sub">
+        <% if @fully_ready.length == 1 %>
+          <span class="hi-green"><%= (@fully_ready.first.sender_name.presence || @fully_ready.first.sender_email).split.first %></span>
+        <% elsif @fully_ready.length > 1 %>
+          <span class="hi-green"><%= @fully_ready.length %> clients complete</span>
+        <% else %>
+          No clients fully ready yet
+        <% end %>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-header">
+        <span class="stat-label">Emails Scanned</span>
+        <div class="stat-icon si-gray">
+          <svg viewBox="0 0 20 20" fill="rgba(255,255,255,0.45)">
+            <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z"/>
+            <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z"/>
+          </svg>
+        </div>
+      </div>
+      <div class="stat-value"><%= @emails_last_7_days %></div>
+      <div class="stat-sub">Last 7 days</div>
+    </div>
+  </div>
+
+  <!-- Content -->
+  <div class="content-grid">
+
+    <!-- Client Pipeline -->
+    <div class="panel">
+      <div class="panel-header">
+        <span class="panel-title">Client Pipeline</span>
+        <a href="#" class="panel-link">View all →</a>
+      </div>
+
+      <% if @clients.empty? %>
+        <div class="empty">
+          <strong>No clients yet</strong>
+          Emails from clients will appear here once received.
+        </div>
+      <% else %>
+        <% @clients.each do |client| %>
+          <%
+            name    = client.sender_name.presence || client.sender_email
+            docs    = client.doc_count.to_i
+            pct     = [(docs.to_f / expected * 100).round, 100].min
+            missing = [expected - docs, 0].max
+            bg      = color_for.(client.sender_email)
+            time_str = client.last_email_at ? time_ago_in_words(client.last_email_at) + " ago" : "—"
+          %>
+          <div class="client-row">
+            <div class="client-avatar" style="background:<%= bg %>">
+              <%= initials_for.(name, client.sender_email) %>
+            </div>
+            <div class="client-info">
+              <div class="client-name"><%= name %></div>
+              <div class="client-email"><%= client.sender_email %></div>
+            </div>
+            <div class="client-progress">
+              <div class="bar-wrap">
+                <div class="bar-fill" style="width:<%= pct %>%;background:<%= bar_color.(pct) %>"></div>
+              </div>
+              <div class="bar-label"><%= docs %>/<%= expected %> docs</div>
+            </div>
+            <div class="client-time"><%= time_str %></div>
+            <% if missing == 0 %>
+              <span class="badge badge-ready">Ready ✓</span>
+            <% else %>
+              <span class="badge badge-missing"><%= missing %> missing</span>
+            <% end %>
+          </div>
+        <% end %>
+      <% end %>
+    </div>
+
+    <!-- Recent Activity -->
+    <div class="panel">
+      <div class="panel-header">
+        <span class="panel-title">Recent Activity</span>
+      </div>
+
+      <% if @recent_activity.empty? %>
+        <div class="empty">
+          <strong>No activity yet</strong>
+          Email activity will appear here.
+        </div>
+      <% else %>
+        <% @recent_activity.each do |email| %>
+          <%
+            sender    = email.sender_name.presence || email.sender_email
+            bg        = color_for.(email.sender_email)
+            att_count = email.attachment_count.to_i
+            time_str  = email.received_at ? time_ago_in_words(email.received_at) + " ago" : "—"
+            subject   = email.subject.presence || "(no subject)"
+          %>
+          <div class="activity-row">
+            <div class="activity-avatar" style="background:<%= bg %>">
+              <%= initials_for.(sender, email.sender_email) %>
+            </div>
+            <div class="activity-body">
+              <div class="activity-sender"><%= sender %></div>
+              <div class="activity-subject"><%= subject %></div>
+              <% if att_count > 0 %>
+                <div class="activity-docs">📎 <%= att_count %> attachment<%= att_count == 1 ? "" : "s" %></div>
+              <% end %>
+            </div>
+            <div class="activity-time"><%= time_str %></div>
+          </div>
+        <% end %>
+      <% end %>
+    </div>
+
+  </div>
+</div>
+
+</body>
+</html>

@@ -1,6 +1,6 @@
 class AuthController < ApplicationController
   def new
-    redirect_to chat_path if broker_signed_in?
+    redirect_to dashboard_path if broker_signed_in?
   end
 
   def destroy

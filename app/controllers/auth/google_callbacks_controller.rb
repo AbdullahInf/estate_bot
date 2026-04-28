@@ -4,7 +4,7 @@ class Auth::GoogleCallbacksController < ApplicationController
     session[:broker_id] = broker.id
     SetupGmailWatchJob.perform_later(broker.id)
     SyncGmailInboxJob.perform_later(broker.id)
-    redirect_to chat_path, notice: "Welcome, #{broker.name}!"
+    redirect_to dashboard_path, notice: "Welcome, #{broker.name}!"
   rescue => e
     Rails.logger.error "Google OAuth error: #{e.message}"
     redirect_to signin_path, alert: "Sign in failed. Please try again."
